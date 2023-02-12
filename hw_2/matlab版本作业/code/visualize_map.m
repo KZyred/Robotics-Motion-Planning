@@ -30,7 +30,7 @@ function visualize_map(map,path,visit_nodes)
         % openlist
         node_sz = 10000/sz_map;
         node = visit_nodes(visit_nodes(:,1)==1, 2:3);
-        scatter1 = scatter(node(:,1)-0.5,node(:,2)-0.5,node_sz,'gs','filled');
+        scatter1 = scatter(node(:,1)-0.5,node(:,2)-0.5,node_sz,'rs','filled');
         alpha(scatter1,.1)
 
         % closelist
