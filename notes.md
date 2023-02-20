@@ -4,7 +4,7 @@
 
 ### (1). Perception-Planning-Control action loop
 
-![image-20230131142448377](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131142448377.png)
+![image.png](https://s2.loli.net/2023/02/20/2Dkn47Q3sXjodAF.png)
 
 - Estimation: (location & status)
   - Low latency
@@ -41,13 +41,13 @@
 
 ##### a. Dijkstra
 
-![image-20230131144745325](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131144745325.png)
+![image.png](https://s2.loli.net/2023/02/20/vguQGet16NcKbn9.png)
 
 ##### b. A*
 
 ##### c. Jump Point Search (JPS)
 
-![image-20230131144717903](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131144717903.png)
+![image.png](https://s2.loli.net/2023/02/20/dfgcOvkeQSHaJF1.png)
 
 #### ② Sampling-based Path Finding (Probabilistic Road Map)
 
@@ -55,14 +55,11 @@
 
 ##### b. Optimal Sampling-based Methods (RRT*)
 
-![image-20230131144833927](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131144833927.png)
+![image.png](https://s2.loli.net/2023/02/20/PCbJXExs3q9Atd1.png)
 
 ##### c. Advanced Sampling-based Methods
 
-| <img src="C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131144933245.png" alt="image-20230131144933245" style="zoom:50%;" /> | <img src="C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131144950046.png" alt="image-20230131144950046" style="zoom:50%;" /> |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-
-
+![image.png](https://s2.loli.net/2023/02/20/GXV7gxLnJYcMTpO.png)
 
 #### ③ Kinodynamic Path Finding (Search-based or Sampling-based)
 
@@ -70,15 +67,15 @@
 
 ##### b. State Lattice Search (离散化控制量生成Graph + Graph Search in high dimensions)
 
-![image-20230131145202560](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131145202560.png)
+![image.png](https://s2.loli.net/2023/02/20/a5YwXGiL9CAk6eQ.png)
 
 ##### c.  Kinodynamic RRT* （随机撒高位状态点？离散化状态量）
 
-![image-20230131145435400](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131145435400.png)
+![image.png](https://s2.loli.net/2023/02/20/gBtMpPZO7EYqDi8.png)
 
 ##### d. Hybrid A* (每一个栅格里只维护一个状态，每个栅格里的状态总是保证路径的总代价最小)
 
-![image-20230131145321491](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131145321491.png)
+![image.png](https://s2.loli.net/2023/02/20/fGMt36hLz7duCNX.png)
 
 
 
@@ -86,16 +83,11 @@
 
 #### ① Minimum Snap Trajectory Generation （从折线路径到动力学光滑轨迹？）
 
-![image-20230131145709876](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131145709876.png)
+![image.png](https://s2.loli.net/2023/02/20/RiVq32kQ7ZtpxMP.png)
 
 #### ② Soft and Hard Constrained Trajectory Optimization
 
-| Hard                                                         | Soft                                                         |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![image-20230131145843188](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131145843188.png) | ![image-20230131150004826](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131150004826.png) |
-| 矩形块标示可通行区域（凸的解空间），通过硬性约束生成路径，路径保持在解空间里 | 障碍物给出梯度距离场（排斥力）                               |
-
-
+![image.png](https://s2.loli.net/2023/02/20/3J8Z9b2O6EkqrAn.png)
 
 ### (5). MDP & MPC
 
@@ -113,15 +105,15 @@
 - Structural
 - Direct Index Query
 
-后验概率 （建立概率栅格地图）：![image-20230131160948616](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131160948616.png)
+后验概率 （建立概率栅格地图）：![image.png](https://s2.loli.net/2023/02/20/1CsZfbwXgUO6Ghr.png)
 
 贝叶斯滤波更新概率栅格地图：
 
-![image-20230131171406059](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131171406059.png)
+![image.png](https://s2.loli.net/2023/02/20/TOsjHU8EqZdo6FS.png)
 
-![image-20230131171434457](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131171434457.png)
+![image.png](https://s2.loli.net/2023/02/20/6otxLRTYSJAMwZX.png)
 
-![image-20230131171459005](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131171459005.png)
+![image.png](https://s2.loli.net/2023/02/20/2MqPTS5CHhyasp1.png)
 
 初始化l0=0，每一次观测都更新lt，设置一个阈值s，当lt>s时就认为该grid被占据
 
@@ -131,7 +123,7 @@
 - Structural
 - Direct Index Query (间接的，通过树的结构递归的查询)
 
-![image-20230131150521551](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131150521551.png)
+![image.png](https://s2.loli.net/2023/02/20/agCyeQ9PXY6OEz7.png)
 
 #### ③ Voxel Hashing (体素哈希表)
 
@@ -141,7 +133,7 @@ Map -> Bucket -> Blocks -> Voxel
 - Structural
 - Indirect Index Query
 
-![image-20230131154108679](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131154108679.png)
+![image.png](https://s2.loli.net/2023/02/20/3xBPyGIqvU5j2Ss.png)
 
 #### ④ Point Cloud Map (墙裂推荐PCL库：http://pointclouds.org/)
 
@@ -150,32 +142,34 @@ Map -> Bucket -> Blocks -> Voxel
 
 #### ⑤ Truncated Signed Distance Functions (TSDF) Map (https://github.com/personalrobotics/OpenChisel) [截断距离场]
 
-![image-20230131154649073](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131154649073.png)
+![image.png](https://s2.loli.net/2023/02/20/N7mpz3AesZ9WnL1.png)
 
 #### ⑥ Euclidean Signed Distance Functions Incremental Update, Global (ESDF) Map [欧式符号距离场] （VoxBlox: https://github.com/ethz-asl/voxblox; FIESTA: https://github.com/HKUST-Aerial-Robotics/FIESTA）
 
-![image-20230131154936540](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131154936540.png)
+![image.png](https://s2.loli.net/2023/02/20/EBtQxRACiXhvG31.png)
 
 - 和占据栅格地图对比，ESDF存在负值（障碍表面内部为负值，值的大小为到最近的free的栅格的距离，而free区域内存放的是正值）
 
-![image-20230131171950312](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131171950312.png)
+![image.png](https://s2.loli.net/2023/02/20/sWBC1uwrkxlF3id.png)
 
 - 建立方法
   - 从栅格地图增量
   - 从TSDF增量
   - 从栅格地图分批滚动建立（节省内存）
 
-![image-20230131172344056](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131172344056.png)
+![image.png](https://s2.loli.net/2023/02/20/g6ZInVUEMzAusqF.png)
 
 - 一维情况（下包络线：到最近障碍物的距离）
 
-![image-20230131200808470](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131200808470.png)
+![image.png](https://s2.loli.net/2023/02/20/OwjJuCDeVfXKn7l.png)
 
-- 高维情况 [**个人理解高维情况可以做抛物面取最小包络面**]![image-20230131204600761](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131204600761.png)
+- 高维情况 [**个人理解高维情况可以做抛物面取最小包络面**]![image.png](https://s2.loli.net/2023/02/20/ZsDME9WpBVmJqaU.png)
 
-![image-20230131200923337](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131200923337.png)
+![image.png](https://s2.loli.net/2023/02/20/AMaoL1fQBkECKIF.png)
 
-#### ⑦ 拓扑地图，地图骨架（用于大型地图下的规划问题）![image-20230131155420234](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131155420234.png)
+#### ⑦ 拓扑地图，地图骨架（用于大型地图下的规划问题）
+
+![image.png](https://s2.loli.net/2023/02/20/1H2LFnOzqdIpw53.png)
 
 
 
@@ -189,9 +183,9 @@ Map -> Bucket -> Blocks -> Voxel
 - Robot Degree Of Freedom (DOF): 用于描述机器人位姿的向量的维度n
 - Robot Configuration Space: n维向量空间，包含机器人所有可能的位姿
 
-![image-20230131144305379](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131144305379.png)
+![image.png](https://s2.loli.net/2023/02/20/xzMpJLSkPo5RDbi.png)
 
-![image-20230131144402744](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131144402744.png)
+![image.png](https://s2.loli.net/2023/02/20/9rVtJb3clqogvfF.png)
 
 
 
@@ -199,11 +193,11 @@ Map -> Bucket -> Blocks -> Voxel
 
 - Graphs（包含nodes和edges）
 
-![image-20230131144658213](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131144658213.png)
+![image.png](https://s2.loli.net/2023/02/20/s4azdrxfg6n9YVc.png)
 
 - Search Tree
 
-![image-20230131144934003](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131144934003.png)
+![image.png](https://s2.loli.net/2023/02/20/E4IdO1c6pPWzYQJ.png)
 
 - **Overview**
 
@@ -229,7 +223,7 @@ Map -> Bucket -> Blocks -> Voxel
 
   - 其container是一个queue，遵循先进先出原则
 
-    ![image-20230131233636919](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131233636919.png)
+    ![image.png](https://s2.loli.net/2023/02/20/RDLQ7g5OUYqdnKF.png)
     
     ```mermaid
     graph TB
@@ -271,7 +265,7 @@ Map -> Bucket -> Blocks -> Voxel
 
   - 其container是一个stack，遵循后进先出原则
 
-    ![image-20230131233715105](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230131233715105.png)
+    ![image.png](https://s2.loli.net/2023/02/20/mn14KOtMi2kH7hD.png)
 
   - 同一深度层级的节点压入的顺序需要自己定义 (这个定义有可能能极大的节省计算量)
 
@@ -312,7 +306,7 @@ Map -> Bucket -> Blocks -> Voxel
 
 - BFS vs. DFS
 
-![image-20230201160959202](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230201160959202.png)
+![image.png](https://s2.loli.net/2023/02/20/nyOIKgeNvsH7FrQ.png)
 
 
 
@@ -320,9 +314,9 @@ Map -> Bucket -> Blocks -> Voxel
   - expand到的node正常压入
   - visit node时，根据一个启发函数选择一个最优的node
   - 该启发函数通常为当前节点到目标节点的距离（欧式距离Euclidean Distance或曼哈顿距离Manhattan Distance）
-  - ![image-20230201161452713](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230201161452713.png)
+  - ![image.png](https://s2.loli.net/2023/02/20/Mr3sQcl8RLGofV7.png)
   - 贪心算法易陷入局部最优，因为启发函数在计算时是忽略了障碍物的
-  - ![image-20230201161549877](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230201161549877.png)
+  - ![image.png](https://s2.loli.net/2023/02/20/pkYND1OrnUc9gja.png)
 
 
 
@@ -349,11 +343,11 @@ Map -> Bucket -> Blocks -> Voxel
 
 #### ④ 伪代码：
 
-- ![image-20230202160545230](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202160545230.png)
+- ![image.png](https://s2.loli.net/2023/02/20/sHSnIqYG4Lk3ydr.png)
 
 ⑤ 示例：
 
-- ![image-20230202160907613](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202160907613.png)
+- ![image.png](https://s2.loli.net/2023/02/20/fCmVk4TP1oOAR5b.png)
 
 - | 当前容器(根据g值自动排序，小的先弹出) | 当前访问节点 | 当前容器               | expand到的node    | g(S) | g(a) | g(b) | g(c) | g(d) | g(e) | g(f) | g(h) | g(p) | g(q) | g(r) | g(G) |
   | ------------------------------------- | ------------ | ---------------------- | ----------------- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
@@ -387,11 +381,11 @@ Map -> Bucket -> Blocks -> Voxel
 
 #### ② 伪代码：
 
-- ![image-20230202172915788](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202172915788.png)
+- ![image.png](https://s2.loli.net/2023/02/20/JL26jNQZaWclgeA.png)
 
 #### ③ 示例：
 
-- ![image-20230202173331243](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202173331243.png)
+- ![image.png](https://s2.loli.net/2023/02/20/gsjWVJ6M7lDkfIR.png)
 
 #### ④ 最优性保证：任意一个node估计的h(n)的必须小于该点到终点实际的cost
 
@@ -399,8 +393,8 @@ Map -> Bucket -> Blocks -> Voxel
   - Euclidean Distance：always less -> √
   - Manhattan Distance：depends -> ? （当机器人只能横纵向移动不能斜行时是最优）
 - 最优性 vs 速度：
-- ![image-20230202174320194](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202174320194.png)
-- ![image-20230202174524147](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202174524147.png)
+- ![image.png](https://s2.loli.net/2023/02/20/BwNQY2X9vbynD8W.png)
+- ![image.png](https://s2.loli.net/2023/02/20/JXwZkiWUG8fnzYE.png)
 
 
 
@@ -408,32 +402,32 @@ Map -> Bucket -> Blocks -> Voxel
 
 ##### a.如何把grid map变为graph（四联通or八联通）
 
-- ![image-20230202174653537](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202174653537.png)
+- ![image.png](https://s2.loli.net/2023/02/20/u6tkzK5rqG2NxQX.png)
 
 ##### b.priority queue的实现
 
-- ![image-20230202174815666](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202174815666.png)
+- ![image.png](https://s2.loli.net/2023/02/20/qGy87fXmoYkEMbl.png)
 
 ##### c.启发函数的优化：
 
-- ![image-20230202175129187](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202175129187.png)
+- ![image.png](https://s2.loli.net/2023/02/20/FLwHuaTW6kZD9qA.png)
 - 欧式距离所估计的h(n)虽然符合h(n)≤h*(n)，但相差很多(不tight/远小于)，导致扩展过程中会2扩展到很多无用的nodes
 - 解决方案：Diagonal Heuristic
-- ![image-20230202175645786](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202175645786.png)
+- ![image.png](https://s2.loli.net/2023/02/20/5sSeAotQVNBwXJ2.png)
 
 ##### d.Tie Breaker
 
 - 当任何一步的扩展中遇到f值相同的nodes时，若无操作，则会根据先后顺序排列，这些nodes可能全部得到expand，这将导致扩展很多不必要的nodes
 - 通过一个操作使对这些nodes的选择不完全随机，而是有倾向性
 - 当两个node的f值相同时，将其中一个放大一个很小的值
-- ![image-20230202180717905](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202180717905.png)
+- ![image.png](https://s2.loli.net/2023/02/20/eZd4oysKAWIG1lT.png)
 - Tie Breaker的其他方法：
   - 当f相同时对h进行排序比较
   - 给h加上根据事先建立好的随机数表（坐标的哈希表）
   - 根据想要的加过对h进行修改（例如想要走对角线，则加一个cross cost）
-  - ![image-20230202181252052](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202181252052.png)
+  - ![image.png](https://s2.loli.net/2023/02/20/qXt6whgST2odyUQ.png)
 - Tie Breaker对后续Trajectory generation的影响
-  - ![image-20230202181436455](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230202181436455.png)
+  - ![image.png](https://s2.loli.net/2023/02/20/cbjZ9XTea6v52Kh.png)
 
 ### (4). JPS: Jump Point Search
 
@@ -443,7 +437,7 @@ Map -> Bucket -> Blocks -> Voxel
     - JPS根据Look Ahead Rule和Jumping Rule来将符合条件的跳跃点加入open list
   - neighbors加入open list后依然是根据f(n)=g(n)+h(n)最小的priority queue弹出node进行visit
 
-![image-20230204181942515](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204181942515.png)
+![image.png](https://s2.loli.net/2023/02/20/naRwNBT1P5K7HY9.png)
 
 #### ① Look Ahead Rule
 
@@ -451,7 +445,7 @@ Map -> Bucket -> Blocks -> Voxel
 
 - 直行时判断条件为**小于等于**；
 
-![image-20230204183442710](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204183442710.png)
+![image.png](https://s2.loli.net/2023/02/20/XaBKoezuPLqg1Gv.png)
 
 - eg. 当前节点为x，父节点为4：
 
@@ -464,7 +458,7 @@ Map -> Bucket -> Blocks -> Voxel
 
 - 对角线行驶时判断条件为**小于**；
 
-![image-20230204183455174](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204183455174.png)
+![image.png](https://s2.loli.net/2023/02/20/V2JdvMsw6yGrpET.png)
 
 - eg. 当前节点为x，父节点为6：
 
@@ -478,7 +472,7 @@ Map -> Bucket -> Blocks -> Voxel
 - 特殊情况：forced neighbor（直行时或斜行时旁边紧邻有障碍物（如下图））
   - 当直行的2 or 7号位有障碍物时，则需要额外将3 or 8号位置为natural neighbor
   - 当斜行的4 or 7号位有障碍物时，则需要额外将1 or 8号位置为natural neighbor
-  - ![image-20230204184243891](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204184243891.png)
+  - ![image.png](https://s2.loli.net/2023/02/20/ERN2flonOkSYMBz.png)
 
 #### ② Jumping Rules
 
@@ -488,13 +482,11 @@ Map -> Bucket -> Blocks -> Voxel
 - 下图中蓝色点加入了open list
 - 绿色点所有可能延申的方向都得到了充分的延申，则绿色点可以加入close list
 
-| ![image-20230204225645774](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204225645774.png) | ![image-20230204225621052](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204225621052.png) | ![image-20230204225712347](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204225712347.png) | ![image-20230204225732994](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204225732994.png) | ![image-20230204225751267](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204225751267.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+![image.png](https://s2.loli.net/2023/02/20/WniCJyYs4FV7Sl2.png)
 
 #### ③ Example1
 
-| ![image-20230204230610459](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204230610459.png) | ![image-20230204230649208](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204230649208.png) | ![image-20230204230913511](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204230913511.png) | ![image-20230204230932481](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204230932481.png) | ![image-20230204231046282](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204231046282.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+![image.png](https://s2.loli.net/2023/02/20/eRpWtGr2P3nKJj8.png)
 
 - 绿色点横向，纵向搜索 =》 无结果
 - 绿色点斜向延申一格后横向，纵向搜索 =》 无结果
@@ -509,11 +501,7 @@ Map -> Bucket -> Blocks -> Voxel
 
 #### ④ Example2
 
-| ![image-20230204234830922](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204234830922.png) | ![image-20230204234839341](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204234839341.png) | ![image-20230204234847606](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204234847606.png) | ![image-20230204234601366](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204234601366.png) | ![image-20230204234619456](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204234619456.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-
-| ![image-20230204234715198](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204234715198.png) | ![image-20230204234725676](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204234725676.png) | ![image-20230204234736425](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204234736425.png) | ![image-20230204234745234](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204234745234.png) | ![image-20230204234755341](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204234755341.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+![image.png](https://s2.loli.net/2023/02/20/qTFGe3M9XvzbAdS.png)
 
 - 这个例子充分的体现出了：
   1. 每个节点所有可能的延申方向得到充分的延申才会加入close list（图中变灰色的节点）
@@ -524,7 +512,7 @@ Map -> Bucket -> Blocks -> Voxel
 - 在复杂的迷宫环境中JPS>A*
 - 在开阔的，障碍物少的环境中JPS<A*（JPS需要延申大面积去确认没有特殊点）
 
-![image-20230204235325509](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230204235325509.png)
+![image.png](https://s2.loli.net/2023/02/20/tykONQCvPLWA8zi.png)
 
 
 
