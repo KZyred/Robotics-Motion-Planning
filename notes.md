@@ -514,6 +514,140 @@ Map -> Bucket -> Blocks -> Voxel
 
 ![image.png](https://s2.loli.net/2023/02/20/tykONQCvPLWA8zi.png)
 
+---
+
+## 3.基于采样的路径规划
+
+### （1）基本思想
+
+- 探索解空间的连续性以获得可行的或最优的解
+- 方法：在连续的构型空间（Configuration Space）中采样出离散的构型空间样本，来构造树或图的结构来表征解空间的连续性
+  - 采样可以批次的进行或增量式的进行
+  - 算法的性能很大程度上取决于采样的策略（碰撞检测的策略）和最近邻搜索的效率
+- 两个基本任务：
+  - **exploration**：探索解空间拓扑连接性的信息【生长树，使之尽可能充满空间】
+  - **exploitation**：增量式的提升（迭代，优化）解【修改树的结构】
+- 术语：
+  - Probabilistic Completeness：概率完备
+  - Asymptotical Optimality：渐进最优
+  - Anytime：即时性
+
+---
+
+### （2）Feasible Path Planning Methods
+
+#### A. Probabilitistic Road Map（PRM）
+
+- 算法流程
+
+| 1.采样n个点                                                  | 2.删除碰撞的点                                               | 3.连接邻域的点                                               | 4.删除有碰撞的连接                                           | 5.搜索该图得到path                                           |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![image.png](https://s2.loli.net/2023/02/20/tfv4xoRJW89Yr5h.png) | ![image.png](https://s2.loli.net/2023/02/20/xGVfQjpk3elXBNT.png) | ![image.png](https://s2.loli.net/2023/02/20/UwfYO5qFSpDyG4N.png) | ![image.png](https://s2.loli.net/2023/02/20/3FnDC6eKtVEsmZW.png) | ![image.png](https://s2.loli.net/2023/02/20/c1b8JUy4aFGRm3V.png) |
+
+- 1~4成为**Learning Phase**；5称为**Query Phase**；
+- 上述流程效率低下，主要原因有：
+  - 没有引入起终点信息，因此可以做到任选起终点的Multi Query --> 希望得到特定解，而不是具有整个空间联动性的图 -->RRT的基本思想
+  - 做了多余的碰撞检测，即不在路径上的碰撞的检测 -->在高维地图中碰撞检测比较耗时 --> Lazy Collision Checking
+    - 采样n个点，连接所有边，search路径，检查路径是否发生碰撞，删除碰撞边，重新search【相当于把碰撞检测延迟到Query Phase做】
+
+---
+
+#### B. Rapidly-exploring Random Tree（RRT）
+
+- 伪代码：
+- ![image.png](https://s2.loli.net/2023/02/20/WdSgAH6T89sljbk.png)
+
+- 算法流程（StepSize越小越准确，但计算量变大）
+
+| 1.每一轮迭代sample一个点Xrand                                | 2.找到目前树上离Xrand最近的点Xnear                           | 3.从Xnear指向Xrand拓展一小段距离StepSize生成Xnew             | 4.检测边（Xnew，Xnear）是否发生碰撞，若碰撞则删除，不碰撞则保留 | 5.当Xnew离Xgoal的距离小于一定范围且Collision Free时，完成    |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![image.png](https://s2.loli.net/2023/02/20/9uZnOTbrjdA4xWc.png) | ![image.png](https://s2.loli.net/2023/02/20/RH7sUe9raCgOIlm.png) | ![image.png](https://s2.loli.net/2023/02/20/a4kuemldnNypJ8f.png) | ![image.png](https://s2.loli.net/2023/02/20/y4DbVQHK2Mp7JlU.png) | ![image.png](https://s2.loli.net/2023/02/20/bYdR6j2pE4o5WMH.png) |
+
+- 结果：
+
+| 很快找到第一个可行解                                         | 但随着迭代的进行，解并没有变好，因此很难找到最优解，且在整个空间进行采样，不够高效 |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![image.png](https://s2.loli.net/2023/02/20/zwy5oiPGZAIF71B.png) | ![image.png](https://s2.loli.net/2023/02/20/PTpnQjRiauBGbcr.png) |
+
+---
+
+### （3）Optimal Path Planning Methods
+
+#### 1. 动态规划（Dynamic Programming）最优性准则（贝尔曼递推方程）
+
+![image.png](https://s2.loli.net/2023/02/20/fCIYxrPVwc6W1TG.png)
+
+- eg. ![image.png](https://s2.loli.net/2023/02/20/gVZmkvU6uyBOo3M.png)
+
+---
+
+#### 2. Direct DP Methods
+
+![image.png](https://s2.loli.net/2023/02/20/3prISHne2mlOikv.png)
+
+- 从node10到node1推，从前往后算，可以算出所有nodes的F值
+- **每个node只算一次的要求**：graph必须是acyclic的，即层级结构或无环结构
+- 然而motion planning中的graph往往是无层级结构的，cyclic的
+
+---
+
+#### 3. RRT*
+
+![image.png](https://s2.loli.net/2023/02/20/8a1DNnrQGoPAMdl.png)
+
+- 伪代码：
+
+![image.png](https://s2.loli.net/2023/02/20/lY6XNEtZc5OkibS.png)
+
+- 前三步和RRT完全一样
+- 每次迭代中，当延申一个StepSize找到Xnew后：
+  - RRT的做法是直接连接Xnew和Xnear
+  - RRT*的做法是：
+    - **QueryRange**：以Xnew为圆心画圆，确定邻域范围（圈住了一系列已有的nodes）
+    - **ChooseParent**：在邻域内找到一个使Xnew的F值最小的node，即Xmin（F(new)=**min**{F(possible parent node)+edge(ij)}）【有点像Dijkstra中的g】，连接edge（Xnew，Xmin）
+    - **Rewire**：对Xnew邻域内的节点Xi，check其目前的F(i)和F(new)+edge(i~new)的大小，如果后者更小，则修改树的结构，将i连到Xnew上（即把Xi的父节点由原来的X某改为Xnew）
+    - 关于QueryRange的半径：在低维情况下，设置为比StepSize稍大的常数即可
+    - ![image-20230220173448267](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230220173448267.png)
+
+- result：可以看到随着迭代的进行RRT*优化了一开始找到的可行解，找到了更优的解
+
+| 找到第一个可行解                                             | 优化了结果                                                   | 优化了结果                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![image.png](https://s2.loli.net/2023/02/20/hNGgt8WKXC9DzLs.png) | ![image.png](https://s2.loli.net/2023/02/20/S5gLYm3nsZahEbl.png) | ![image.png](https://s2.loli.net/2023/02/20/LmdD821OGcI3VJK.png) |
+
+---
+
+#### 4. RRT*应用中的加速策略
+
+- Bias Sampling（偏置采样）
+- Sample Rejection（拒绝某些采样）
+  - 当已经有了一个可行解后，其cost即为c*
+  - 当采样一个新点并找到Xnew后，计算出Xnew的F值（即g值）
+  - 设计一个heuristic函数（通常采用到目标点的欧拉距离）
+  - 若g+h>c*，则拒绝该采样
+- Branch-and-Bound（剪枝）
+  - 当已经有了一个可行解后，其cost即为c*
+  - 在现有的nodes中判断，将g+h>>c*的node及其子枝全部减除
+- Graph Sparsify
+  - 将图网格化
+  - 通过选格子的方式进行采样（稀疏采样）
+  - 只能找到在离散状态下的可能的最优解，在连续状态下一定不是最优的
+- Neighbor Query
+  - k-nearest
+  - range query
+  - KD Tree [Kd-Tree算法](https://blog.csdn.net/ysqjyjy/article/details/50060893)
+  - Range Tree [区域树（Range Tree）的构建（Build）与查询（Query](https://blog.csdn.net/qq_41685265/article/details/111207494)
+- Delay Collision Check
+- Bi-Direction Search（双向搜索）
+- Conditional Rewire（找到第一个解后再进行rewire操作）
+
+---
+
+### （4）Accelerate Convergence（加速收敛）
+
+
+
+
 
 
 
