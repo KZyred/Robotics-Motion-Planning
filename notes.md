@@ -518,6 +518,8 @@ Map -> Bucket -> Blocks -> Voxel
 
 ## 3.基于采样的路径规划
 
+Visualizations：https://github.com/ZJU-FAST-Lab/sampling-based-path-finding
+
 ### （1）基本思想
 
 - 探索解空间的连续性以获得可行的或最优的解
@@ -593,6 +595,8 @@ Map -> Bucket -> Blocks -> Voxel
 
 #### 3. RRT*
 
+*Karaman, Sertac, and Emilio Frazzoli. “Sampling-Based Algorithms for Optimal Motion Planning.” The International Journal of Robotics Research, vol. 30, no. 7, June 2011, pp. 846–894, doi:10.1177/0278364911406761*
+
 ![image.png](https://s2.loli.net/2023/02/20/8a1DNnrQGoPAMdl.png)
 
 - 伪代码：
@@ -645,6 +649,101 @@ Map -> Bucket -> Blocks -> Voxel
 
 ### （4）Accelerate Convergence（加速收敛）
 
+#### 1. RRT*存在的问题
+
+- Over-exploitation：rewire了很多non-promising的节点
+
+  - 例如当存在一个可行解，且其cost=c0，对于f(Xnew)+h(Xnew)>c0的节点的邻域节点再进行rewire是不必要的
+
+  - ![image.png](https://s2.loli.net/2023/02/20/SLztkogYi8lfqRE.png)
+
+- Under-exploitation：有一些可能优化解的rewire没有得到操作
+
+  - | 图中可以观察到Xnew右侧的点由于得到了rewire其f值得到了优化，  | 但是到goal节点的路径并没有得到优化，这是因为goal的父节点并不在Xnew的邻域范围内，没有被rewire到 |
+    | ------------------------------------------------------------ | ------------------------------------------------------------ |
+    | ![image.png](https://s2.loli.net/2023/02/20/TqcaXGr7kO9RSEf.png) | ![image.png](https://s2.loli.net/2023/02/20/Z1LrPO3u2JoKDyi.png) |
+
+#### 2. RRT#（从exploitation角度提升收敛速度）
+
+*O. Arslan and P. Tsiotras, "Use of relaxation methods in sampling-based algorithms for optimal motion planning," 2013 IEEE International Conference on Robotics and Automation, 2013, pp. 2421-2428, doi: 10.1109/ICRA.2013.6630906*.
+
+![image.png](https://s2.loli.net/2023/02/20/5nLHhDpAO392cjG.png)
+
+- 从图中可以看到RRT*向各个方向都进行了充分了延申，这对于single-query的问题来说是浪费的
+- RRT#更专注于特定方向的求解，因此效率更高
+
+![image.png](https://s2.loli.net/2023/02/20/lPEtygDoNsG8TcW.png)
+
+#### 3. Informed RRT*（从exploration的角度提升收敛速度）
+
+*J. D. Gammell, T. D. Barfoot and S. S. Srinivasa, "Informed Sampling for Asymptotically Optimal Path Planning," in IEEE Transactions on Robotics, vol. 34, no. 4, pp. 966-984, Aug. 2018, doi: 10.1109/TRO.2018.2830331*.
+
+![image.png](https://s2.loli.net/2023/02/20/oK9ugEwHbaMWzIq.png)
+
+##### a.基本思想
+
+![image.png](https://s2.loli.net/2023/02/20/sNFrOvKCphbzmZi.png)
+
+- 对全知集的估计
+  - 全知集Omniscient Set：在该集合内采样可以提升解的最优性的的集合（即上图中的不规则图形）
+- 估计形式：
+  1. Bounding Box：在每个维度设置坐标上下限限制区域，二维即为矩形，三维长方体
+  2. Path Heuristics：在现有路径周围横向扩展一定宽度形成的区域
+  3. L2 Heuristics：以起终点为焦点，现有路径的长度为长轴，画椭圆
+
+![image.png](https://s2.loli.net/2023/02/20/I45k7E3tYN8LKW6.png)
+
+- 对比结果：L2 Heuristics的Precision率和Recall率均为最高
+- **只有以欧氏距离为Heuristics时，才可以采用该椭圆为Informed Set，采用其他Heuristics时，Informed Set需要另外设计，在高维中，很可能不能显式的设计出来**
+
+![image.png](https://s2.loli.net/2023/02/20/wgeORAUhrC3mLo4.png)
+
+##### b.采样操作
+
+![image.png](https://s2.loli.net/2023/02/20/sg59p6c87LSGxZR.png)
+
+1. 在单位圆中均匀采样
+2. 放缩长短轴，使其变为椭圆形
+3. 旋转一定角度
+4. 平移到所需要的位置
+
+#### 4.GuILD (Guided Incremental Local Densification)（也是从exploration的角度提升收敛速度，相当于Informed的提升版）
+
+*Aditya Mandalika and Rosario Scalise and Brian Hou and Sanjiban Choudhury and Siddhartha S. Srinivasa, Guided Incremental Local Densification for Accelerated Sampling-based Motion Planning," in Arxiv, 2021, https://arxiv.org/abs/2104.05037*
+
+##### a.椭圆Informed Set策略的局限性
+
+1. 对于下图所示的两种情况，可以预见，初始找到的可行解极大概率是曲折的，这意味着c*（当前cost）将较大，这会导致椭圆面积较大，此时采样到小径的概率是极低的，因此很难找到最优解
+
+   ![image.png](https://s2.loli.net/2023/02/20/x3AJcLoTiaWE9et.png)
+
+2. 只有在c*变小的时候，椭圆的面积才可能减小
+
+##### b.基本思想
+
+- 从当前的已经扩展的点中选择一个中间信标点b，建立两个椭圆，在这两个椭圆的并集范围内采样
+
+![image.png](https://s2.loli.net/2023/02/20/MP16HBgKopcAhjE.png)
+
+- 第一个椭圆以起点和信标点为焦点，以从起点到该点的当前最优cost（g(b)）为长轴
+- 第二个椭圆以信标点和终点为焦点，以（当前最优cost-g(b)）为长轴
+- 易证，这两个椭圆的并集（LSs：Local Subsets）是Informed Set（IS）的子集
+
+![image.png](https://s2.loli.net/2023/02/20/AnBRLyO6WDPkKhu.png)
+
+- 效果：
+
+![image.png](https://s2.loli.net/2023/02/20/FeRgcqLaOzplTkA.png)
+
+### （5）发展趋势
+
+![image.png](https://s2.loli.net/2023/02/20/3t42hx5MzDLmjrk.png)
+
+[1]OMPL：https://ompl.kavrakilab.org/ （强推，很全面）
+
+[2] https://moveit.ros.org/ 
+
+[3] https://github.com/ZJU-FAST-Lab/sampling-based-path-finding
 
 
 
