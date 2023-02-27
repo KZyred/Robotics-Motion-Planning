@@ -745,11 +745,209 @@ Visualizations：https://github.com/ZJU-FAST-Lab/sampling-based-path-finding
 
 [3] https://github.com/ZJU-FAST-Lab/sampling-based-path-finding
 
+---
 
+## 4.动力学约束下的路径规划
 
+### （1）动力学约束
 
+**Kinodyanmic** = **Kinematic**（运动学：eg.避障） + **Dynamic**（动力学：eg.速度，加速度和力上的bounds）
 
+- Q：既然有Trajectory Optimization的步骤，为什么还要再Path Finding的过程中考虑高阶的Kinodynamic的约束？
 
+​	![image.png](https://s2.loli.net/2023/02/27/GfNqmVlednBiRCz.png)
+
+- A：
+  - Motion Planning是一个coarse to fine的过程，并不一定要割裂的两部分，换句话说，如果在Path Planning中完全不考虑动力学约束，那么在动力学模型复杂的情况下可能不能得到一个很好的初始路线，那么即使经过Trajectory Optimization，最终结果也会不那么理想
+  - Trajectory Optimization是在局部进行优化的，并不能在全局保证动力学最优性
+  - eg.    ![image.png](https://s2.loli.net/2023/02/27/eyKanrgQpZLOhjz.png)
+    - 在本例中无人机具有向右的初速度，如果在Path Planning的过程中完全不考虑动力学约束，则会生成如紫色实线这样的路径，经过Trajectory Optimization后得到如紫色虚线这样的轨迹，这样的轨迹涉及到急转弯，在运动学上并不是最优的方案
+    - 如果在Path Planning时就考虑动力学约束，得到如绿色实线这样的路径，经过Trajectory Optimization后很容易得到一条平滑的feasible的轨迹
+
+---
+
+### （2）常见的动力学模型
+
+- 独轮车模型
+
+  ![image.png](https://s2.loli.net/2023/02/27/RFs1DcM7GbaZLx5.png)
+
+- 差速车模型
+
+  ![image.png](https://s2.loli.net/2023/02/27/Lc91yfQ6WOSBmTt.png)
+
+- 小车模型
+
+![image.png](https://s2.loli.net/2023/02/27/KDEeBoHJRTjZk9u.png)
+
+---
+
+### （3）状态栅格搜索算法—State Lattice Planning
+
+#### 	A. 基本思想
+
+建树/图，使其上每条边都满足动力学约束（feasible motion connections），再运用前述的图搜索算法即可
+
+---
+
+##### 	a. Forward Direction：
+
+离散控制空间，使机器人前进一段距离，形成路径（例如L2中提到的四联通，八联通，本质上是对质点模型控制量的离散化）
+
+![image.png](https://s2.loli.net/2023/02/27/jYO64Fs3X2aPtTM.png)
+
+- 在differentially driven的情况下有:
+  $$
+  \dot{s}=f(s,u)
+  $$
+
+- 其中S为状态向量，在自动驾驶任务中为
+
+- u为输入量，在自动驾驶任务中为**a（油门：加速度），α（转向盘：角加速度）**
+
+- 选定一系列输入量u0~un，设定一个作用时间T，即可进行前向仿真（Forward Simulation），得到一系列未来的离散状态**Sf0~Sfn**
+
+- ![image.png](https://s2.loli.net/2023/02/27/IJrYZXn6OgCSPps.png)
+
+- 特点：
+
+  - 无任务导向（类似Dijkstra），效率低
+  - 易于实施
+
+- 实施：
+
+  状态空间模型([ACnD 1. 状态空间模型 (State Space Model) - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/466790657))【**线性系统**】
+  $$
+  \dot{s}=A\cdot s + B\cdot u
+  $$
+  其中s为n维向量，包含系统的所有状态量，u为系统的输入量（控制量）
+
+  对于无人机的线性模型而言，取控制量为
+  $$
+  u=\begin{pmatrix}
+  \ddot{x}\\
+  \ddot{y}\\
+  \ddot{z}\\
+  \end{pmatrix}
+  $$
+  则状态空间为
+  $$
+  s=\begin{pmatrix}
+  x\\y\\z\\
+  \dot{x}\\\dot{y}\\\dot{z}
+  \end{pmatrix}
+  $$
+  则有
+  $$
+  A=\begin{bmatrix}
+  0&0&0&1&0&0\\0&0&0&0&1&0\\
+  0&0&0&0&0&1\\0&0&0&0&0&0\\
+  0&0&0&0&0&0\\0&0&0&0&0&0\\
+  \end{bmatrix}
+  &&B=\begin{bmatrix}
+  0&0&0\\0&0&0\\
+  0&0&0\\1&0&0\\
+  0&1&0\\0&0&1\\
+  \end{bmatrix}
+  $$
+  在如下初始条件下
+  $$
+  v_{0}=
+  \begin{bmatrix}
+  1\\0\\0
+  \end{bmatrix}
+  &即&s_{0}=
+  \begin{bmatrix}
+  x_{0}\\y_{0}\\z_{0}\\1\\0\\0
+  \end{bmatrix}
+  $$
+  将控制量离散化，有如下结果：
+
+  ![image.png](https://s2.loli.net/2023/02/27/vStWzPLHJfM1DIR.png)
+
+  可以猜测离散得到的九个控制量可能为：
+  $$
+  u_{1}=
+  \begin{pmatrix}
+  1\\1\\0
+  \end{pmatrix}
+  u_{2}=
+  \begin{pmatrix}
+  2\\1\\0
+  \end{pmatrix}
+  u_{3}=
+  \begin{pmatrix}
+  3\\1\\0
+  \end{pmatrix}
+  
+  u_{4}=
+  \begin{pmatrix}
+  1\\0\\0
+  \end{pmatrix}
+  u_{5}=
+  \begin{pmatrix}
+  2\\0\\0
+  \end{pmatrix}
+  u_{6}=
+  \begin{pmatrix}
+  3\\0\\0
+  \end{pmatrix}
+  
+  u_{7}=
+  \begin{pmatrix}
+  1\\-1\\0
+  \end{pmatrix}
+  u_{8}=
+  \begin{pmatrix}
+  2\\-1\\0
+  \end{pmatrix}
+  u_{9}=
+  \begin{pmatrix}
+  3\\-1\\0
+  \end{pmatrix}
+  $$
+  已知初始状态，已知控制量，可以根据状态转移方程算出输出状态
+
+  ![image.png](https://s2.loli.net/2023/02/27/Dgn1tBGx9kiAver.png)
+
+  在这里，如果将A构建为幂零矩阵（nilpotent matirx），会大大简化计算
+
+  
+
+  
+
+  若再以得到的八个s为s0分别进行如上操作，则可以得到**lattice graph**，例如下图
+
+  ![image.png](https://s2.loli.net/2023/02/27/XB3Z8KkLao4Ru6I.png)
+
+- eg. 对于汽车（非线性系统）
+
+- ![image.png](https://s2.loli.net/2023/02/27/ZQWzVIx74Ry8Sre.png)
+
+---
+
+##### 	b. Reverse Direction
+
+离散状态空间，再将这些离散的状态点进行连接，形成路径（例如L3中提到的PRM本质上是对质点模型x，y两种维度的离散化）
+
+![image.png](https://s2.loli.net/2023/02/27/RqBcm2gLClEsYoF.png)
+
+- 对于differentially driven的情况:
+- 选定一系列Sf，计算从S0~Sf所需的u和T（通常是固定T，计算可能的u）
+- ![image.png](https://s2.loli.net/2023/02/27/zIK7kViW6gHl9Y1.png)
+- ![image.png](https://s2.loli.net/2023/02/27/qcLomV8SgBj1AQE.png)
+- 特点：
+  - 自然的具有贪心性，很容易做得到目标导向，因此planning的效率较高
+  - 但实施难度较大（对于给定起始和末尾状态点，有无数种状态转移路线，这就涉及到最优问题（**Optimal Boundary Value Problem**））
+
+##### c. Comparison
+
+![image.png](https://s2.loli.net/2023/02/27/mqURXfOkQFHMirT.png)
+
+- 在道路环境下，Sample in control space会出现一部分采样驶出路面，这就会导致可用的采样变少，即最优path只能从一个较小的集合中找出（离散度过大）
+- 同质化问题：在Sample in control space，当有一个障碍物使得某个path不可用时，其临近的多个path可能都不可用，这就是同质化问题，若多个path在拓扑环境中过于相似，这样的采样就是低效的（离散度过小）
+
+---
 
 
 
