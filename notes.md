@@ -784,15 +784,11 @@ Visualizations：https://github.com/ZJU-FAST-Lab/sampling-based-path-finding
 
 ### （3）状态栅格搜索算法—State Lattice Planning
 
-#### 	A. 基本思想
-
 建树/图，使其上每条边都满足动力学约束（feasible motion connections），再运用前述的图搜索算法即可
 
----
+#### A. Forward Direction：
 
-##### 	a. Forward Direction：
-
-离散控制空间，使机器人前进一段距离，形成路径（例如L2中提到的四联通，八联通，本质上是对质点模型控制量的离散化）
+**离散控制空间**，使机器人前进一段距离，形成路径（例如L2中提到的四联通，八联通，本质上是对质点模型控制量的离散化）
 
 ![image.png](https://s2.loli.net/2023/02/27/jYO64Fs3X2aPtTM.png)
 
@@ -926,9 +922,9 @@ Visualizations：https://github.com/ZJU-FAST-Lab/sampling-based-path-finding
 
 ---
 
-##### 	b. Reverse Direction
+#### B. Reverse Direction
 
-离散状态空间，再将这些离散的状态点进行连接，形成路径（例如L3中提到的PRM本质上是对质点模型x，y两种维度的离散化）
+**离散状态空间**，再将这些离散的状态点进行连接，形成路径（例如L3中提到的PRM本质上是对质点模型x，y两种维度的离散化）
 
 ![image.png](https://s2.loli.net/2023/02/27/RqBcm2gLClEsYoF.png)
 
@@ -940,7 +936,187 @@ Visualizations：https://github.com/ZJU-FAST-Lab/sampling-based-path-finding
   - 自然的具有贪心性，很容易做得到目标导向，因此planning的效率较高
   - 但实施难度较大（对于给定起始和末尾状态点，有无数种状态转移路线，这就涉及到最优问题（**Optimal Boundary Value Problem**））
 
-##### c. Comparison
+##### * 两边界值最优问题（Optimal Boudary Value Problem, OBVP）
+
+1. 获得可行解（BVP）
+
+   - 对于一维状态转移问题
+   - ![image.png](https://s2.loli.net/2023/02/28/1UDktG3SLxndRlQ.png)
+   - 可以假设状态转移路线为五次曲线，五次曲线有6个待定参数，一对边界条件可以给出2个方程，因此对方程分别求一阶导和二阶导，共2*3=6个方程，可以解出全部未知量
+   - ![image.png](https://s2.loli.net/2023/02/28/ysH8PXr3KGAIzdE.png)
+
+2. 获得最优解（OBVP）
+
+   1. 问题的一般描述
+
+      1. 用到的变量和函数有：
+
+         s(t)：与t有关的n维变量，表示t时刻系统的状态量，有边界条件s(0)
+
+         u(t)：与t有关的m维变量，表示t时刻系统的输入量
+
+         系统建模为：
+         $$
+         \dot{s(t)}=f(s(t),u(t))
+         $$
+         J(T)：终末时刻T时刻的惩罚函数值
+         $$
+         J(T)=h(s(T))+\int_0^Tg(s(t),u(t))dt
+         $$
+         其中:
+
+         h(s(T))表征是否达到终点；g(s,u)表征路径中的cost；
+
+         H(s,u,λ)：Hamiltonian方程
+         $$
+         H(s,u,\lambda)=g(s,u)+\lambda^Tf(s,u)
+         $$
+         λ：n维协变量，维度与s一致
+
+         ---
+
+      2. 求解：
+
+         s*：最优的状态转移方程
+
+         u*：随时间最优的控制输入
+
+         ---
+
+      3. Pontryagin's Minimum Principle 庞特里亚金最小值原理
+
+         λ(t)是如下微分方程的解：
+         $$
+         \dot{\lambda(t)}=-\nabla_sH(s^*(t),u^*(t),\lambda(t))
+         $$
+         要解此方程须有边界条件：
+         $$
+         \lambda(T)=-\nabla h(s^*(T))
+         \\s^*(0)=s(0)\ \ \ (given)
+         $$
+         其中:
+         $$
+         \dot{s^*(t)}=f(s^*(t),u^*(t))
+         $$
+         则有所求的最优控制量为：
+         $$
+         u^*(t)=\arg\mathop{\min}\limits_{u(t)}H(s^*(t),u(t),\lambda(t))
+         $$
+
+         ---
+
+   2. 实例：无人机
+
+      1. 建模
+         $$
+         s_k=(p_k,v_k,a_k)\\(given\ \ s(0)=s_0,s(T)=s_f)\\
+         u_k=j_k\\
+         \dot{s_k}=f(s_k,u_k)=(v_k,a_k,j_k)\\
+         其中k=x,y,z三轴\\
+         J_k=\frac{1}{T}\int_0^Tj_k(t)^2dt
+         $$
+   
+      2. 求解：对每个轴单独进行以下操作
+         $$
+         \lambda=(\lambda_1,\lambda_2,\lambda_3)\\
+         H(s,u,\lambda)=\frac{1}{T}j^2+\lambda^Tf(s,u)\\=\frac{1}{T}j^2+\lambda_1 v+\lambda_2 a+\lambda_3 j\\
+         \dot{\lambda}=-\nabla_sH(s^*,u^*,\lambda)=(0,\lambda_1 ,\lambda_2 )\\(对向量s求偏导就是对s中的元素分别求偏导，再组合形成向量，对上例即H分别对p,v,a求偏导)\\
+         $$
+         现在有如下方程组：
+         $$
+         \lambda=(\lambda_1,\lambda_2,\lambda_3)\\
+         \dot{\lambda}=(0,-\lambda_1 ,-\lambda_2 )
+         $$
+         因此显然λ可以设为如下的形式：
+         $$
+         \lambda=\begin{pmatrix}
+         \alpha\\-\alpha t-\beta\\\frac12\alpha t^2+\beta t+\gamma
+         \end{pmatrix}^T
+         $$
+         因此最优控制量u*可以解出：
+         $$
+         u^*(t)=\arg\mathop{\min}\limits_{u(t)}H(s^*(t),u(t),\lambda(t))\\
+         \because u(t)=j(t)\\
+         \therefore u^*(t)=\arg\mathop{\min}\limits_{j(t)}H(s^*(t),j(t),\lambda(t))\\
+         $$
+         其中：
+         $$
+         H(s^*,j,\lambda)=\frac{1}{T}j^2+\lambda_1 v^*+\lambda_2 a^*+\lambda_3 j
+         $$
+         此时第二三项已经最小，使H最小的j的取值的求法即为：
+         $$
+         j^*=\arg\mathop{\min}\limits_{j}(\frac{1}{T}j^2+\lambda_3 j)
+         $$
+         因此，很容易求出：
+         $$
+         u^*=j^*=-\frac1T\lambda_3=-\frac1T(\frac12\alpha t^2+\beta t+\gamma)
+         $$
+         得到j，通过积分很容易得到a，v，p，即解出只与α，β，γ有关的s*：
+         $$
+         s^*=-\frac2T\begin{pmatrix}
+         \frac{1}{120}\alpha t^5+\frac{1}{24}\beta t^4+\frac{1}{6}\gamma t^3+\frac{1}{2}a_0t^2+v_0t+p_0\\
+         \frac{1}{24}\alpha t^4+\frac{1}{6}\beta t^3+\frac{1}{2}\gamma t^2+a_0t+v_0\\
+         \frac{1}{6}\alpha t^3+\frac{1}{2}\beta t^2+\gamma t+a_0
+         \end{pmatrix}^T\\
+         s_0=(p_0,v_0,a_0)\ \ is\ \ given
+         $$
+         将末尾边界条件sf代入有：
+         $$
+         \because(T)=s_f=(p_f,v_f,a_f)\ \ is\ \ given\\
+         \therefore-\frac2T
+         \begin{bmatrix}
+         \frac1{120}T^5&\frac1{24}T^4&\frac1{6}T^3\\
+         \frac1{24}T^4&\frac1{6}T^3&\frac1{2}T^2\\
+         \frac1{6}T^3&\frac1{2}T^2&T\\
+         \end{bmatrix}
+         \begin{bmatrix}
+         \alpha \\ \beta \\ \gamma\\
+         \end{bmatrix}=
+         \begin{bmatrix}
+         p_f-p_0-v_0T-\frac12a_0T^2\\v_f-v_0-a_0T\\a_f-a_0
+         \end{bmatrix}\\
+         \therefore
+         \begin{bmatrix}
+         \alpha \\ \beta \\ \gamma\\
+         \end{bmatrix}=-\frac1{2T^4}
+         \begin{bmatrix}
+         720&-360&60T^2\\-360T&168T^2&-24T^3\\60T^2&-24T^3&3T^4
+         \end{bmatrix}
+         \begin{bmatrix}
+         p_f-p_0-v_0T-\frac12a_0T^2\\v_f-v_0-a_0T\\a_f-a_0
+         \end{bmatrix}\\
+         $$
+         此时α，β，γ只与T有关，即s\*，u\*，J*只与T有关
+         
+         - 可以给定T，即可求出所需的s, u
+         - 或在T定义域内求极值，求出J使最小时的T，再求出所需的s, u
+      
+   3. 一些讨论
+   
+      1. 上例中不存在与终点有关的惩罚函数h(s)，这是因为末端状态已经由s(T)=sf给出，此时的h(s)可以认为是以下形式：
+         $$
+         h(s(t))=
+         \begin{cases}
+         0 & t=T\\\infty & t\ne T
+         \end{cases}
+         $$
+         这个函数在t=T处不可导，因此不引入目标函数J中
+   
+      2. 可能存在s中某些分量的末状态给定，某些分量不给定的情况，例如：
+         $$
+         s(T)=(p_f,?,?)
+         $$
+         此时，目标函数J中就需要加入h(s)，且存在边界条件
+         $$
+         given\ \ s_i(T)\\
+         \lambda_j(T)=\frac{\partial h(s^*(T))}{\partial s_j},\ for\ j\ne i
+         \\其中\ \ i+j=n
+         $$
+         可以想象由于j个分量没给出导致的j个自由度，全部由这j个新的方程约束
+
+---
+
+#### C. Comparison
 
 ![image.png](https://s2.loli.net/2023/02/27/mqURXfOkQFHMirT.png)
 
@@ -949,5 +1125,29 @@ Visualizations：https://github.com/ZJU-FAST-Lab/sampling-based-path-finding
 
 ---
 
+#### D. Heuristic Function
 
+![image.png](https://s2.loli.net/2023/03/01/vEpOFw4caqlz53m.png)
+
+- 假设不考虑障碍物：即解两状态间的OBVP问题
+- 假设不考虑动力学：绕过障碍物的直线最短路径
+- 工程实际应用可能将两者求和，加权，或取最大值
+
+![image.png](https://s2.loli.net/2023/03/01/TCHUd59blj7gpJ1.png)
+
+#### E. Planning in Frenet-serret Frame
+
+因为汽车是行驶在结构化的道路上的，辅以车道线检测的结果，可以把汽车坐标转换到Frenet-Serret坐标系下[(23条消息) 弗莱纳公式（Frenet–Serret formulas）_弗莱纳坐标系_CA727的博客-CSDN博客](https://blog.csdn.net/cfan927/article/details/107233889)，并在此坐标系下进行一种特殊的Lattice Planning，即法向d(t)和切向s(t)分别进行参数化，采样和解OBVP
+
+在论文*Optimal Trajectory Generation for Dynamic Street Scenarios in a Frenet Frame,* Moritz Werling, Julius Ziegler, Sören Kammel, and Sebastian Thrun和*Optimal trajectories for time-critical street scenarios using discretized terminal manifolds*, Moritz Werling, Sören Kammel, Julius Ziegler and Lutz Gröll中将d(t)和s(t)都建模为**五次多项式**
+
+![image.png](https://s2.loli.net/2023/03/01/6KrRStbCnXqFZl8.png)
+
+例如对于变道任务，可以预想末状态法向的速度和加速度应该都为0，那么就有
+$$
+D(T)=\begin{pmatrix}
+d_T&0&0
+\end{pmatrix}
+$$
+结合初状态就可以进行OBVP的求解
 
