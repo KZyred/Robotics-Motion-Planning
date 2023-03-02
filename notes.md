@@ -1135,6 +1135,8 @@ Visualizations：https://github.com/ZJU-FAST-Lab/sampling-based-path-finding
 
 ![image.png](https://s2.loli.net/2023/03/01/TCHUd59blj7gpJ1.png)
 
+---
+
 #### E. Planning in Frenet-serret Frame
 
 因为汽车是行驶在结构化的道路上的，辅以车道线检测的结果，可以把汽车坐标转换到Frenet-Serret坐标系下[(23条消息) 弗莱纳公式（Frenet–Serret formulas）_弗莱纳坐标系_CA727的博客-CSDN博客](https://blog.csdn.net/cfan927/article/details/107233889)，并在此坐标系下进行一种特殊的Lattice Planning，即法向d(t)和切向s(t)分别进行参数化，采样和解OBVP
@@ -1150,4 +1152,82 @@ d_T&0&0
 \end{pmatrix}
 $$
 结合初状态就可以进行OBVP的求解
+
+---
+
+### （4）Hybrid A* （基于离散控制量形成的Lattice Graph）
+
+#### 1. 基本思想
+
+![image.png](https://s2.loli.net/2023/03/02/s92Ql7ixGb4tcpm.png)
+
+离散控制量形成的Lattice Graph有如下两个问题：
+
+1. 为了确保有可行解，往往将控制量离散为很多份，这样就会导致Lattice Graph非常稠密
+2. 由于稠密，多条路径之间可能及其相似，即同质性，这样是非常低效的
+
+故考虑对Lattice Graph进行剪枝（prune），剪枝的方法就是结合栅格地图的思想，即**每个栅格中只维护一个Feasible Local Motion**
+
+- Q：当一个栅格中有多个cost时候，如何取舍？
+- A：维护从父节点到该节点的cost最小的一个（这里的cost不只是距离，而是综合定义的广义的cost函数的值）
+
+#### 2. 算法流程
+
+![image.png](https://s2.loli.net/2023/03/02/ibvJNuTREyKOZhk.png)
+
+与传统A*的不同：
+
+1. h(n)和g(n)的设计不同
+2. 找neighbor的方式不同：
+   1. A*是找八邻域的nodes
+   2. JPS是找符合特殊跳点规则的neighbor
+   3. Hybrid A*中的neighbors是：从父节点（motion）出发将离散的一系列控制量分别经过一次forward  simulate得到的一系列simulated feasible local motions
+3. 需要维护每个网格中只有一个feasible local motion：
+   1. 若延申某个新的结点时发现其所在的网格中无motion，则将该状态存在该网格中
+   2. 若延申某个新的结点时发现其所在的网格中已有motion，则分别比较他们从父节点到自身的cost，保留更小的那个
+
+#### 3. Heuristic Function Design
+
+![image.png](https://s2.loli.net/2023/03/02/54oyFz9TepOURH8.png)
+
+![image.png](https://s2.loli.net/2023/03/02/L8dzfvZ6MjnrOJ3.png)
+
+（a）：2D-Euclidean Distance；（b）：non-holonomic-without-obstacles（即与终末状态求OBVP）
+
+这两者比较显然non-holonomic-without-obstacles更好，因为其更接近H的真实值
+
+但是non-holonomic-without-obstacles在迷宫（多死胡同）中表现不佳，因为它没有障碍物信息，其天然的贪心性质会把机器人往目标方向引导（例如（c）图）
+
+这是可以把holonomic-with-obstacles（即2D shortest path）纳入H函数（即每个位置解一下与目标点的最短路径（可以通过A*或Dijkstra求解）），这样采用non-holonomic-without-obstacles + holonomic-with-obstacles或max（non-holonomic-without-obstacles，holonomic-with-obstacles）作为H函数
+
+#### 4. 工程技巧 One-Shot
+
+在Exploration的过程中，不断尝试解当前状态到目标状态的OBVP，如果出现解无碰撞，则可以停止探索，直接采用该解（OBVP无法考虑障碍物信息，因此解OBVP总是有解，但很大困难会与障碍物碰撞）
+
+![image.png](https://s2.loli.net/2023/03/02/CwDqEG18XJyPBQc.png)
+
+在Exploration初期，找到这样一个One-Shot解的概率较小，因此可以设置一个常数N，即每扩展N次，尝试一次求One-Shot解，随着与目标点距离越来越近，找到One-Shot解的概率会变大，这时可以减小N，这样会更频繁的尝试求One-Shot解
+
+---
+
+### （5）Kinodynamic RRT*（基于离散状态量形成的Lattice Graph）
+
+![image.png](https://s2.loli.net/2023/02/20/lY6XNEtZc5OkibS.png)
+
+Kinodynamic RRT\*与RRT\*的不同
+
+1. Sample：RRT\*在x,y二维空间中采样，K-RRT\*在n维空间中采样（s向量的维度为n）
+
+2. 如何确定邻域：【==关于如何求reachable set已经有很多成熟的算法==】
+
+   n维空间中一个点，以及定义好的cost函数，cost≤r的点的集合叫做reachable set
+
+   1.  backward-reachable set：以该点为终点，即以高维空间中任意点为起点，以小于r的cost能够到达该点的所有点的集合
+   2.  forward-reachable set：以该点为起点，即高维空间中以该点为起点，以小于r的cost能到达的所有点的集合
+
+3. ChooseParents：找到$x_{new}$后，求其backward-reachable set，在其中找到cost最小的作为Parent
+
+4. Rewire：求出$x_{new}$的forward-reachable set，逐一检查他们目前$g(n)$和$g(x_{new})+cost(x_{new},x_i)$的大小，维护较小的
+
+
 
